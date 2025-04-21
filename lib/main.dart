@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/Login_SignIn/splash_screen.dart';
 import 'package:flutter_application_1/Pages/home.dart';
 import 'package:camera/camera.dart';
 
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const Home(),
+      home: SplashScreen(),
     );
   }
 }

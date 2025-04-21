@@ -1,0 +1,2 @@
+D:/FYP1/Sign-Lang/android/app/.cxx/Debug/i6u2m6z6/x86_64/CMakeFiles/edit_cache.dir
+D:/FYP1/Sign-Lang/android/app/.cxx/Debug/i6u2m6z6/x86_64/CMakeFiles/rebuild_cache.dir

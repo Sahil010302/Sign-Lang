@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_application_1/Major_Pages/utils.dart' as utils;
 import 'package:flutter_application_1/Major_Pages/textToSign.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_application_1/const.dart'; // Assuming color/theme constants
 
 class SpeechScreen extends StatefulWidget {
   const SpeechScreen({Key? key}) : super(key: key);
@@ -21,6 +24,9 @@ class _SpeechScreenState extends State<SpeechScreen> {
   String _displaytext = 'Press the button and start speaking';
   int _state = 0;
 
+  String _selectedLanguage = 'English';
+  bool _showLanguageDropdown = false;
+
   @override
   void initState() {
     super.initState();
@@ -30,164 +36,128 @@ class _SpeechScreenState extends State<SpeechScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: secondaryColor,
       appBar: AppBar(
+        automaticallyImplyLeading: true,
+        backgroundColor: primaryColor,
         title: const Text(
           'Sanket',
-          style: TextStyle(
-            color: Colors.white,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        leading: Builder(
-          builder: (BuildContext context) {
-            return IconButton(
-              icon: new Image.asset("assets/logo/sanket_icon.png"),
-              onPressed: () {},
-            );
-          },
-        ),
+        // leading: Padding(
+        //   padding: const EdgeInsets.all(8.0),
+        //   child: Image.asset("assets/logo/sanket_icon.png"),
+        // ),
       ),
-
       body: RefreshIndicator(
+        onRefresh: () async {
+          setState(() {
+            _text = '';
+            _path = 'assets/letters/';
+            _img = 'space';
+            _ext = '.png';
+            _displaytext = 'Press the button and start speaking...';
+            _state = 0;
+          });
+        },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          child: Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  margin: const EdgeInsets.fromLTRB(0, 0.0, 0, 0.0),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 500),
-                    child: Image(
-                      image: AssetImage('$_path$_img$_ext'),
-                      fit: BoxFit.contain,
-                      alignment: Alignment.center,
-                      key: ValueKey<int>(_state),
-                      width: MediaQuery.of(context).size.width,
-                      height: (4 / 3) * MediaQuery.of(context).size.width,
-                    ),
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 500),
+                child: Image.asset(
+                  '$_path$_img$_ext',
+                  fit: BoxFit.contain,
+                  key: ValueKey<int>(_state),
                   width: MediaQuery.of(context).size.width,
                   height: (4 / 3) * MediaQuery.of(context).size.width,
                 ),
-
-                const Divider(
-                  thickness: 2,
-                  color: Colors.black,
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              const Divider(
+                  thickness: 1.5,
+                  color: Colors.black45,
                   indent: 20,
-                  endIndent: 20,
+                  endIndent: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                child: Text(
+                  _displaytext,
+                  style: const TextStyle(fontSize: 20.0, color: Colors.black),
                 ),
-
-                Container(
-                  padding: const EdgeInsets.fromLTRB(30.0, 0, 30.0, 0),
-                  child: SingleChildScrollView(
-                    reverse: true,
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    scrollDirection: Axis.horizontal,
-                    child: Container(
-                      height: 0.04 * MediaQuery.of(context).size.height,
-                      child: Text(
-                        _displaytext,
-                        style: const TextStyle(
-                          fontSize: 20.0,
-                          color: Colors.black,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
+              ),
+              if (_showLanguageDropdown)
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                  child: DropdownButton<String>(
+                    value: _selectedLanguage,
+                    items: ['English', 'Hindi', 'Marathi']
+                        .map((lang) => DropdownMenuItem(
+                              value: lang,
+                              child: Text(lang),
+                            ))
+                        .toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedLanguage = newValue!;
+                      });
+                    },
                   ),
                 ),
-
-                const Divider(
-                  thickness: 2,
-                  color: Colors.black,
-                  indent: 20,
-                  endIndent: 20,
-                ),
-
-
-                // Expanded(
-                //   child:
-                //   Container(
-                //     padding: const EdgeInsets.fromLTRB(0.0, 00.0, 0.0, 0.0),
-                //     height: MediaQuery.of(context).size.width,
-                //
-                //     child: Container(
-                //     decoration: BoxDecoration(
-                //         color: Colors.orange,
-                //         borderRadius: BorderRadius.only(
-                //         topRight: Radius.circular(MediaQuery.of(context).size.width/2),
-                //         topLeft: Radius.circular(MediaQuery.of(context).size.width/2),
-                //         ),
-                //       ),
-                //     ),
-                //   ),
-                // ),
-              ],
-            ),
+              const Divider(
+                thickness: 1.5,
+                color: Colors.black54,
+                indent: 20,
+                endIndent: 20,
+              ),
+            ],
           ),
         ),
-        onRefresh: () {
-          return Future.delayed(
-            const Duration(seconds: 1),
-            () {
-              setState(() {
-                _text = '';
-                _path = 'assets/letters/';
-                _img = 'space';
-                _ext = '.png';
-                _displaytext = 'Press the button and start speaking...';
-                _state = 0;
-              });
-            },
-          );
-        },
       ),
-
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      // floatingActionButton: AvatarGlow(
-      //   animate: _isListening,
-      //   glowColor: Theme.of(context).primaryColor,
-      //   endRadius: 75.0,
-      //   duration: const Duration(milliseconds: 2000),
-      //   repeatPauseDuration: const Duration(milliseconds: 100),
-      //   repeat: true,
-      //   child: FloatingActionButton(
-      //     onPressed: _listen,
-      //     child: Icon(_isListening ? Icons.mic : Icons.mic_none),
-      //     foregroundColor: Colors.white,
-      //     // backgroundColor: Colors.white,
-      //     // foregroundColor: Theme.of(context).primaryColor,
-      //   ),
-      // ),
-
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           FloatingActionButton(
+            backgroundColor: primaryColor,
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => TextToSignPage()),
               );
             },
-            child: Icon(Icons.mode_edit_outline_outlined), // Pencil icon
-            foregroundColor: Colors.black,
+            child: Icon(Icons.mode_edit_outline_outlined),
+            foregroundColor: Colors.white,
           ),
           AvatarGlow(
             animate: _isListening,
-            glowColor: Theme.of(context).primaryColor,
+            glowColor: primaryColor,
             endRadius: 75.0,
             duration: const Duration(milliseconds: 2000),
             repeatPauseDuration: const Duration(milliseconds: 100),
             repeat: true,
             child: FloatingActionButton(
+              backgroundColor: primaryColor,
               onPressed: _listen,
               child: Icon(_isListening ? Icons.mic : Icons.mic_none),
-              foregroundColor: Colors.black,
+              foregroundColor: Colors.white,
             ),
+          ),
+          FloatingActionButton(
+            backgroundColor: primaryColor,
+            onPressed: () {
+              setState(() {
+                _showLanguageDropdown = !_showLanguageDropdown;
+              });
+            },
+            child: const Icon(Icons.g_translate),
+            foregroundColor: Colors.white,
           ),
         ],
       ),
@@ -199,7 +169,6 @@ class _SpeechScreenState extends State<SpeechScreen> {
       bool available = await _speech.initialize(
         onStatus: (val) => print('onStatus: $val'),
         onError: (val) => print('onError: $val'),
-        debugLogging: true,
       );
       if (available) {
         setState(() => _isListening = true);
@@ -208,128 +177,69 @@ class _SpeechScreenState extends State<SpeechScreen> {
             _text = val.recognizedWords;
           }),
         );
-        // await Future.delayed(const Duration(seconds: 3));
-        // translation(_text);
       }
     } else {
       setState(() => _isListening = false);
       _speech.stop();
-      translation(_text);
-      _state = 0;
+      await translation(_text);
     }
   }
 
-  void translation(String _text) async {
-    _displaytext = '';
-    String speechStr = _text.toLowerCase();
+  Future<void> translation(String originalText) async {
+    setState(() {
+      _displaytext = '';
+    });
 
-    // -------- logic - detect phrases --------------------
-    // List<String> subList = [];
-    // List<String> strArray = filterKnownStr(speechStr, utils.phrases, subList);
-    // -------- end logic - detect phrases ----------------
+    String processedText = originalText.toLowerCase();
+    String displayText = processedText;
 
-    // if(utils.phrases.contains(speechStr)){
-    //   String file = speechStr;
-    //   setState(() {
-    //     _display_text += _text;
-    //     _path = 'assets/ISL_Gifs/';
-    //     _img = file;
-    //     _ext = '.gif';
-    //   });
-    //   await Future.delayed(const Duration(milliseconds: 11000));
-    //   // return false;
-    // } else {
-    List<String> strArray = speechStr.split(" ");
+    if (_selectedLanguage == 'Hindi' || _selectedLanguage == 'Marathi') {
+      displayText = processedText;
+      processedText =
+          await translateToEnglish(processedText, _selectedLanguage);
+    }
+
+    setState(() {
+      _displaytext = displayText;
+    });
+
+    List<String> strArray = processedText.split(" ");
     for (String content in strArray) {
-      // print('$content');
-      // if(utils.phrases.contains(content)){
-      //   String file = content;
-      //   int idx = utils.phrases.indexOf(content);
-      //   int _duration = int.parse(utils.phrases.elementAt(idx+1));
-      //   // print('$_duration');
-      //   setState(() {
-      //     _state += 1;
-      //     _displaytext += content;
-      //     _path = 'assets/ISL_Gifs/';
-      //     _img = file;
-      //     _ext = '.gif';
-      //   });
-      //   await Future.delayed(Duration(milliseconds: _duration));
-      //
-      // } else
       if (utils.words.contains(content)) {
         String file = content;
         int idx = utils.words.indexOf(content);
         int _duration = int.parse(utils.words.elementAt(idx + 1));
-        // print('$_duration');
         setState(() {
-          _state += 1;
-          _displaytext += content;
+          _state++;
           _path = 'assets/ISL_Gifs/';
           _img = file;
           _ext = '.gif';
         });
         await Future.delayed(Duration(milliseconds: _duration));
       } else {
-        String file = content;
-        if (utils.hello.contains(file)) {
-          file = 'hello';
-          int idx = utils.words.indexOf(file);
-          int _duration = int.parse(utils.words.elementAt(idx + 1));
-          // print('$_duration');
-          setState(() {
-            _state += 1;
-            _displaytext += content;
-            _path = 'assets/ISL_Gifs/';
-            _img = file;
-            _ext = '.gif';
-          });
-          await Future.delayed(Duration(milliseconds: _duration));
-        } else if (utils.you.contains(file)) {
-          file = 'you';
-          int idx = utils.words.indexOf(file);
-          int _duration = int.parse(utils.words.elementAt(idx + 1));
-          // print('$_duration');
-          setState(() {
-            _state += 1;
-            _displaytext += content;
-            _path = 'assets/ISL_Gifs/';
-            _img = file;
-            _ext = '.gif';
-          });
-          await Future.delayed(Duration(milliseconds: _duration));
-        } else {
-          for (var i = 0; i < content.length; i++) {
-            if (utils.letters.contains(content[i])) {
-              String char = content[i];
-              // print('$alphabet');
-              setState(() {
-                _state += 1;
-                _displaytext += char;
-                _path = 'assets/letters/';
-                _img = char;
-                _ext = '.png';
-              });
-              await Future.delayed(const Duration(milliseconds: 1500));
-            } else {
-              String letter = content[i];
-              // print('$letter');
-              setState(() {
-                _state += 1;
-                _displaytext += letter;
-                _path = 'assets/letters/';
-                _img = 'space';
-                _ext = '.png';
-              });
-              await Future.delayed(const Duration(milliseconds: 1000));
-            }
+        for (var i = 0; i < content.length; i++) {
+          if (utils.letters.contains(content[i])) {
+            String char = content[i];
+            setState(() {
+              _state++;
+              _path = 'assets/letters/';
+              _img = char;
+              _ext = '.png';
+            });
+            await Future.delayed(const Duration(milliseconds: 1500));
+          } else {
+            setState(() {
+              _state++;
+              _path = 'assets/letters/';
+              _img = 'space';
+              _ext = '.png';
+            });
+            await Future.delayed(const Duration(milliseconds: 1000));
           }
         }
       }
-      // _display_text += ' ';
       setState(() {
-        _state += 1;
-        _displaytext += " ";
+        _state++;
         _path = 'assets/letters/';
         _img = 'space';
         _ext = '.png';
@@ -337,39 +247,38 @@ class _SpeechScreenState extends State<SpeechScreen> {
       await Future.delayed(const Duration(milliseconds: 1000));
     }
   }
-}
 
-List<String> filterKnownStr(
-    String speechStr, List<String> islGif, List<String> finalArr) {
-  bool check = true;
+  Future<String> translateToEnglish(
+      String input, String selectedLanguage) async {
+    final Map<String, String> languageCodes = {
+      'English': 'en',
+      'Hindi': 'hi',
+      'Marathi': 'mr',
+    };
 
-  for (String known in islGif) {
-    List<String> tmp;
-    if (speechStr.contains(known)) {
-      check = false;
-      tmp = speechStr.split(known);
-      tmp[0] = tmp[0].trim();
-      finalArr.addAll(tmp[0].split(' '));
-      finalArr.add(known);
+    final String sourceLang = languageCodes[selectedLanguage] ?? 'en';
 
-      if (finalArr.isEmpty) {
-        finalArr = ['null'];
-      }
-      if (tmp.length == 1) {
-        return finalArr;
-      }
-      tmp[1] = tmp[1].trim();
-      if (tmp[1] != '') {
-        return filterKnownStr(tmp[1], islGif, finalArr);
-      } else {
-        return finalArr;
-      }
+    final url = Uri.parse(
+      'https://translation.googleapis.com/language/translate/v2?key=AIzaSyDiWbNGn_oUfZwa-7OJWn96MIW8IrDK_I4',
+    );
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'q': input,
+        'source': sourceLang,
+        'target': 'en',
+        'format': 'text',
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data['data']['translations'][0]['translatedText'];
+    } else {
+      print("Translation failed: ${response.body}");
+      return input;
     }
   }
-  if (check) {
-    List<String> tmp = speechStr.split(" ");
-    finalArr.addAll(tmp);
-    return finalArr;
-  }
-  return [];
 }

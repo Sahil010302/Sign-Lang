@@ -11,28 +11,46 @@ class Text_To_Speech extends StatefulWidget {
 
 class _Text_To_SpeechState extends State<Text_To_Speech> {
   final FlutterTts tts = FlutterTts();
-  TextEditingController TextEditingontroller = TextEditingController();
+  TextEditingController textEditingController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor:
+          const Color(0xFFcad2c5), // Background color from your theme
       appBar: AppBar(
-        backgroundColor: bgColor,
+        backgroundColor: primaryColor,
         title: const Text(
           "Text To Speech",
           style: appbarStyle,
         ),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // Image on top
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset(
+                'assets/images/textToSpeech2.avif', // make sure this exists
+                height: 290,
+                width: 390,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Text input
+            TextField(
               maxLength: 500,
               maxLines: 5,
-              controller: TextEditingontroller,
+              controller: textEditingController,
               decoration: const InputDecoration(
                 hintText: "Enter the text ...",
+                filled: true,
+                fillColor: Colors.white,
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.all(
                     Radius.circular(20),
@@ -46,36 +64,35 @@ class _Text_To_SpeechState extends State<Text_To_Speech> {
                 ),
               ),
             ),
-          ),
-          GestureDetector(
-            onTap: () {
-              print(TextEditingontroller.text);
-              speak(TextEditingontroller.text);
-            },
-            child: Container(
-              height: 45,
-              width: 90,
-              decoration: BoxDecoration(
-                color: Colors.black,
-                border: Border.all(
-                  color: Colors.white,
-                ),
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(8),
-                ),
-              ),
-              child: const Center(
-                child: Text(
-                  "Speech",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+
+            const SizedBox(height: 16),
+
+            // Speech button
+            GestureDetector(
+              onTap: () {
+                speak(textEditingController.text);
+              },
+              child: Container(
+                height: 55,
+                width: 180,
+                decoration: BoxDecoration(
+                    color: cardColor, // consistent color
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey)),
+                child: const Center(
+                  child: Text(
+                    "Speak",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
             ),
-          )
-        ],
+          ],
+        ),
       ),
     );
   }
